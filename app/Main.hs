@@ -3,6 +3,7 @@
 
 module Main where
 
+import Control.Monad (replicateM)
 import GHC.Generics (Generic)
 import System.Random (Uniform, Finite)
 import System.Random.Stateful (
@@ -11,11 +12,11 @@ import System.Random.Stateful (
 
 
 data Drink = Milk | Coffee | OrangeJuice
-  deriving (Show, Generic, Finite, Uniform)
+  deriving (Show, Enum, Bounded, Generic, Finite, Uniform)
 data Dish = Salad | Sandwich | Fish
-  deriving (Show, Generic, Finite, Uniform)
+  deriving (Show, Enum, Bounded, Generic, Finite, Uniform)
 data Dessert = Watermelon | Icecream | FruitPie
-  deriving (Show, Generic, Finite, Uniform)
+  deriving (Show, Enum, Bounded, Generic, Finite, Uniform)
 
 data Menu = Drink Drink | Dish Dish | Dessert Dessert
 
@@ -31,7 +32,7 @@ data Who =
 
 type Index = Int
 
-data Target = 
+data Target =
     Set Index Who
   | SelectCount Target Int
   | SelectLike Target Menu
@@ -51,8 +52,34 @@ data Person = Person Drink Dish Dessert
 randomPerson :: IO Person
 randomPerson = uniformM globalStdGen
 
+allPeopleSet :: Int -> [[Person]]
+allPeopleSet size = replicateM size 
+  [ Person drink dish dessert 
+  | drink   <- [Milk ..]
+  , dish    <- [Salad ..]
+  , dessert <- [Watermelon ..] ]
+
+{--
+allTargets :: Int -> [Target]
+
+--}
+
+{--
+allRules :: Int -> [Rule]
+allRules count = 
+  
+--}
+
 selectPeople :: Int -> IO [Person]
-selectPeople count = mapM (const randomPerson) [1..count]
+selectPeople count = sequence $ repeat randomPerson
+
+
+{--
+createGame :: Int -> IO ([Person], [Rule])
+createGame count = do
+  people <- selectPeople count
+
+--}
 
 main :: IO ()
 main = putStrLn "Hello, Haskell!"
